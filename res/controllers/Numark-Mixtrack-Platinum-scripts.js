@@ -265,7 +265,7 @@ MixtrackPlatinum.EffectUnit = function (unitNumbers) {
             components.Pot.prototype.input.call(this, channel, control, value, status, group);
         },
         connect: function() {
-            this.focus_connection = engine.makeConnection(eu.group, "focused_effect", this.onFocusChange.bind(this));
+            this.focus_connection = engine.makeConnection(eu.group, "focused_effect", this.onFocusChange);
             this.focus_connection.trigger();
         },
         disconnect: function() {
@@ -367,7 +367,7 @@ MixtrackPlatinum.EffectUnit = function (unitNumbers) {
         },
         connect: function() {
             components.Button.prototype.connect.call(this);
-            this.fx_connection = engine.makeConnection(eu.group, "focused_effect", this.onFocusChange.bind(this));
+            this.fx_connection = engine.makeConnection(eu.group, "focused_effect", this.onFocusChange);
         },
         disconnect: function() {
             components.Button.prototype.disconnect.call(this);
@@ -405,7 +405,7 @@ MixtrackPlatinum.EffectUnit = function (unitNumbers) {
                     button.send(button.off);
                     button.flash_state = true;
                 }
-            }.bind(this));
+            });
         },
         stopFlash: function() {
             engine.stopTimer(this.flash_timer);
@@ -426,7 +426,7 @@ MixtrackPlatinum.EffectUnit = function (unitNumbers) {
                 engine.setValue(eu.group, "show_parameters", 1);
             }
         }
-    }.bind(this));
+    });
     this.show_focus_connection.trigger();
 
     this.touch_strip = new this.EffectUnitTouchStrip();
@@ -563,7 +563,7 @@ MixtrackPlatinum.Deck = function(number, midi_chan, effects_unit) {
         type: components.Button.prototype.types.toggle,
         connect: function() {
             components.Button.prototype.connect.call(this);
-            this.connections[1] = engine.makeConnection(this.group, this.outKey, MixtrackPlatinum.pflToggle.bind(this));
+            this.connections[1] = engine.makeConnection(this.group, this.outKey, MixtrackPlatinum.pflToggle);
         },
     });
 
@@ -1369,6 +1369,24 @@ MixtrackPlatinum.deckSwitch = function (channel, control, value, status, group) 
     }
     else if (MixtrackPlatinum.decks[deck].active && (channel == 0x01 || channel == 0x03)) {
         MixtrackPlatinum.effects[2].setCurrentUnit(deck);
+    }
+
+    // Send deck change signal for skin
+    if (channel == 0x00) { // Deck 1
+        engine.setValue("[Controller]", "deck3_active", 0);
+        engine.setValue("[Controller]", "deck1_active", 1);
+    }
+    else if (channel == 0x01) { // Deck 2
+        engine.setValue("[Controller]", "deck4_active", 0);
+        engine.setValue("[Controller]", "deck2_active", 1);
+    }
+    else if (channel == 0x02) { // Deck 3
+        engine.setValue("[Controller]", "deck1_active", 0);
+        engine.setValue("[Controller]", "deck3_active", 1);
+    }
+    else if (channel == 0x03) { // Deck 4
+        engine.setValue("[Controller]", "deck2_active", 0);
+        engine.setValue("[Controller]", "deck4_active", 1);
     }
 
     // also zero vu meters
